@@ -1,5 +1,6 @@
 <template>
-  <HelloWorld />
+  <ComponentStatusTodos />
+  <ComponentNavBar />
 </template>
 
 <script setup>
