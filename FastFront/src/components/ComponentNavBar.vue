@@ -1,18 +1,18 @@
 <template>
   <v-bottom-navigation :elevation="24" grow>
-    <v-btn value="recent">
+    <v-btn :to="'/viewProjects'" >
       <IconClipboardSearch stroke={2} />
-      <span>Criar Projeto</span>
+      <span>Ir para Projeto</span>
     </v-btn>
 
-    <v-btn value="favorites">
+    <v-btn value="activitys">
       <IconPin stroke={2} />
       <span>Criar atividade</span>
     </v-btn>
 
-    <v-btn value="nearby">
+    <v-btn value="customers">
       <IconUserPlus stroke={2} />
-      <span>Criar Cliente</span>
+      <span>Ir para Cliente</span>
     </v-btn>
   </v-bottom-navigation>
 </template>
