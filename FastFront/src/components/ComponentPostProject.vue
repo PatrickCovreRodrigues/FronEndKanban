@@ -1,79 +1,82 @@
 <template>
   <form @submit.prevent="submit">
     <v-text-field
-      v-model="name.value"
-      :counter="10"
-      :error-messages="name.errorMessage.value"
+      v-model="formData.name"
       label="Name"
     ></v-text-field>
 
     <v-text-field
-      v-model="description.value.value"
-      :counter="7"
-      :error-messages="description.errorMessage.value"
+      v-model="formData.description"
       label="Description"
     ></v-text-field>
 
-    <v-text-field
-      v-model="email.value.value"
-      :error-messages="email.errorMessage.value"
-      label="E-mail"
-    ></v-text-field>
-
     <v-select
-      v-model="select.value.value"
-      :error-messages="select.errorMessage.value"
-      :items="items"
-      label="Customer"
+      v-model="formData.select"
+      :items="customers"
+      item-text="name"
+      item-value="id"
+      label="Select Customer"
     ></v-select>
 
-    <v-btn
-      class="me-4"
-      type="submit"
-    >
-      submit
-    </v-btn>
-
-    <v-btn @click="handleReset">
-      clear
-    </v-btn>
+    <v-btn type="submit">Submit</v-btn>
   </form>
 </template>
-<script setup>
-  import { ref } from 'vue'
-  import { useForm, useField } from 'vee-validate'
-  const { handleSubmit, handleReset } = useForm({
-    validationSchema: {
-      name (value) {
-        if (value?.length >= 2) return true
 
-        return 'Name needs to be at least 2 characters.'
+<script>
+import axios from 'axios';
+import { useForm } from 'vee-validate';
+
+export default {
+  data() {
+    return {
+      formData: {
+        name: '',
+        description: '',
+        select: ''
       },
-      email (value) {
-        if (/^[a-z.-]+@[a-z.-]+\.[a-z]+$/i.test(value)) return true
-
-        return 'Must be a valid e-mail.'
+      customers: [],
+      url: 'http://127.0.0.1:8000/projects/', 
+      customersUrl: 'http://127.0.0.1:8000/customers/' 
+    };
+  },
+  async created() {
+    await this.fetchCustomers();
+  },
+  methods: {
+    async fetchCustomers() {
+      try {
+        const response = await axios.get(this.customersUrl);
+        this.customers = response.data;
+      } catch (error) {
+        console.error('Error fetching customers:', error);
+      }
+    }
+  },
+  setup() {
+    const { handleSubmit, handleReset } = useForm({
+      validationSchema: {
+        name: 'required|min:3',
+        description: 'required|min:3',
+        select: 'required'
       },
-      select (value) {
-        if (value) return true
-
-        return 'Select an item.'
+      select(value) {
+        if (value) return true;
+        return 'This field is required';
       },
-    },
-  })
-  const name = useField('name')
-  const description = useField('description')
-  const email = useField('email')
-  const select = useField('select')
+    });
 
-  const items = ref([
-    'Item 1',
-    'Item 2',
-    'Item 3',
-    'Item 4',
-  ])
+    const submit = handleSubmit(async (values) => {
+      try {
+        const response = await axios.post(this.url, values);
+        console.log(response.data);
+        alert('Project created');
+      } catch (error) {
+        console.error(error);
+        alert('Error');
+      }
+    });
 
-  const submit = handleSubmit(values => {
-    alert(JSON.stringify(values, null, 2))
-  })
+    return { submit, handleReset };
+  }
+};
 </script>

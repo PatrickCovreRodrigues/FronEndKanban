@@ -6,7 +6,7 @@
     <v-list id="listProject" :items="items">
       <v-list-item v-for="(item, index) in items" :key="index">
         {{ item.name }}
-        <v-btn @click="fetchDeleteProject(item.id)">Delete</v-btn>
+        <v-btn @click="fetchDeleteProject(item.id)"><Trash /></v-btn>
       </v-list-item>
     </v-list>
   </v-card>
@@ -35,7 +35,7 @@ export default {
     },
     async fetchDeleteProject(id) {
       try {
-        const response = await axios.delete(this.url + id); 
+        const response = await axios.delete(this.url + '/1'); 
         console.log(response.data);
         this.fetchGetProjects();
       } catch (error) {

@@ -1,3 +1,3 @@
 <template>
-    <ComponentForms />
+    <ComponentPostProject />
 </template>
