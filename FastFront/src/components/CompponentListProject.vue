@@ -30,12 +30,12 @@ export default {
     items: [], 
     url: "http://127.0.0.1:8000/projects/", 
     headers: [
-      { text: "ID", value: "id" },
-      { text: "Nome", value: "name" },
-      { text: "Descrição", value: "description_project" },
-      { text: "Cliente", value: "customer_id" },
-      { text: "Criado em", value: "created_at" },
-      { text: "Ações", value: "actions", sortable: false },
+      { title: "ID", value: "id" },
+      { title: "Nome", value: "name" },
+      { title: "Descrição", value: "description_project" },
+      { title: "Cliente", value: "customer_id" },
+      { title: "Criado em", value: "created_at" },
+      { title: "Ações", value: "actions", sortable: false },
     ],
   }),
   created() {

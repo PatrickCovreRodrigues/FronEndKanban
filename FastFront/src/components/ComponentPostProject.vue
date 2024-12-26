@@ -15,7 +15,7 @@
     <v-select
       v-model="formData.customer_id"
       :items="customers"
-      item-text="name"
+      item-title="name"
       item-value="id"
       label="Select Customer"
       :rules="[rules.required]"
