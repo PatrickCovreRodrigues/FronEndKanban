@@ -1,24 +1,42 @@
 <template>
-  <v-card
-    class="mx-auto"
-    max-width="300"
-  >
-    <v-list id="listProject" :items="items">
-      <v-list-item v-for="(item, index) in items" :key="index">
-        {{ item.name }}
-        <v-btn @click="fetchDeleteProject(item.id)"><Trash /></v-btn>
-      </v-list-item>
-    </v-list>
+  <v-card class="mx-auto" max-width="800">
+    <v-data-table
+      :items="items"
+      :headers="headers"
+      class="elevation-1"
+      item-value="id"
+      item-key="id"
+      dense
+    >
+      <template v-slot:top>
+        <v-toolbar flat>
+          <v-toolbar-title>Projetos</v-toolbar-title>
+        </v-toolbar>
+      </template>
+
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-icon @click="editProject(item)">mdi-pencil</v-icon>
+        <v-icon @click="fetchDeleteProject(item.id)" class="red--text">mdi-delete</v-icon>
+      </template>
+    </v-data-table>
   </v-card>
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data: () => ({
-    items: [],
-    url: 'http://127.0.0.1:8000/projects/'
+    items: [], 
+    url: "http://127.0.0.1:8000/projects/", 
+    headers: [
+      { text: "ID", value: "id" },
+      { text: "Nome", value: "name" },
+      { text: "Descrição", value: "description_project" },
+      { text: "Cliente", value: "customer_id" },
+      { text: "Criado em", value: "created_at" },
+      { text: "Ações", value: "actions", sortable: false },
+    ],
   }),
   created() {
     this.fetchGetProjects();
@@ -27,21 +45,43 @@ export default {
     async fetchGetProjects() {
       try {
         const response = await axios.get(this.url);
-        console.log(response.data);
         this.items = response.data;
       } catch (error) {
-        console.error(error);
+        console.error("Erro ao buscar projetos:", error);
       }
     },
     async fetchDeleteProject(id) {
       try {
-        const response = await axios.delete(this.url + id); 
-        console.log(response.data);
-        this.fetchGetProjects();
+        await axios.delete(`${this.url}${id}`);
+        this.fetchGetProjects(); 
       } catch (error) {
-        console.error(error);
+        console.error("Erro ao excluir projeto:", error);
       }
     },
-  }
-}
+    editProject(item) {
+      console.log("Editar projeto:", item);
+    },
+    formatDate(date) {
+      if (!date) return "";
+      return new Date(date).toLocaleDateString("pt-BR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+    },
+  },
+};
 </script>
+
+<style>
+.v-icon {
+  cursor: pointer;
+  margin-left: 8px;
+}
+.v-icon.red--text {
+  color: red;
+}
+.v-data-table {
+  margin-top: 16px;
+}
+</style>
