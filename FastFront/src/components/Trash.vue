@@ -1,74 +1,93 @@
 <template>
-<button class="bin-button">
+<button class="deleteButton">
   <svg
-    class="bin-top"
-    viewBox="0 0 39 7"
-    fill="none"
     xmlns="http://www.w3.org/2000/svg"
-  >
-    <line y1="5" x2="39" y2="5" stroke="white" stroke-width="4"></line>
-    <line
-      x1="12"
-      y1="1.5"
-      x2="26.0357"
-      y2="1.5"
-      stroke="white"
-      stroke-width="3"
-    ></line>
-  </svg>
-  <svg
-    class="bin-bottom"
-    viewBox="0 0 33 39"
     fill="none"
-    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 50 59"
+    class="bin"
   >
-    <mask id="path-1-inside-1_8_19" fill="white">
-      <path
-        d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z"
-      ></path>
-    </mask>
     <path
-      d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z"
-      fill="white"
-      mask="url(#path-1-inside-1_8_19)"
+      fill="#B5BAC1"
+      d="M0 7.5C0 5.01472 2.01472 3 4.5 3H45.5C47.9853 3 50 5.01472 50 7.5V7.5C50 8.32843 49.3284 9 48.5 9H1.5C0.671571 9 0 8.32843 0 7.5V7.5Z"
     ></path>
-    <path d="M12 6L12 29" stroke="white" stroke-width="4"></path>
-    <path d="M21 6V29" stroke="white" stroke-width="4"></path>
+    <path
+      fill="#B5BAC1"
+      d="M17 3C17 1.34315 18.3431 0 20 0H29.3125C30.9694 0 32.3125 1.34315 32.3125 3V3H17V3Z"
+    ></path>
+    <path
+      fill="#B5BAC1"
+      d="M2.18565 18.0974C2.08466 15.821 3.903 13.9202 6.18172 13.9202H43.8189C46.0976 13.9202 47.916 15.821 47.815 18.0975L46.1699 55.1775C46.0751 57.3155 44.314 59.0002 42.1739 59.0002H7.8268C5.68661 59.0002 3.92559 57.3155 3.83073 55.1775L2.18565 18.0974ZM18.0003 49.5402C16.6196 49.5402 15.5003 48.4209 15.5003 47.0402V24.9602C15.5003 23.5795 16.6196 22.4602 18.0003 22.4602C19.381 22.4602 20.5003 23.5795 20.5003 24.9602V47.0402C20.5003 48.4209 19.381 49.5402 18.0003 49.5402ZM29.5003 47.0402C29.5003 48.4209 30.6196 49.5402 32.0003 49.5402C33.381 49.5402 34.5003 48.4209 34.5003 47.0402V24.9602C34.5003 23.5795 33.381 22.4602 32.0003 22.4602C30.6196 22.4602 29.5003 23.5795 29.5003 24.9602V47.0402Z"
+      clip-rule="evenodd"
+      fill-rule="evenodd"
+    ></path>
+    <path fill="#B5BAC1" d="M2 13H48L47.6742 21.28H2.32031L2 13Z"></path>
   </svg>
+
+  <span class="tooltip">Delete</span>
 </button>
 </template>
 
 <style>
 /* From Uiverse.io by vinodjangid07 */ 
-.bin-button {
+.deleteButton {
+  width: 40px;
+  height: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 55px;
-  height: 55px;
-  border-radius: 15px;
-  background-color: rgb(255, 95, 95);
+  gap: 3px;
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  border: 3px solid rgb(255, 201, 201);
-  transition-duration: 0.3s;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
 }
-.bin-bottom {
-  width: 15px;
+.deleteButton svg {
+  width: 44%;
 }
-.bin-top {
-  width: 17px;
-  transform-origin: right;
-  transition-duration: 0.3s;
+.deleteButton:hover {
+  background-color: rgb(237, 56, 56);
+  overflow: visible;
 }
-.bin-button:hover .bin-top {
+.bin path {
+  transition: all 0.2s;
+}
+.deleteButton:hover .bin path {
+  fill: #fff;
+}
+.deleteButton:active {
+  transform: scale(0.98);
+}
+.tooltip {
+  --tooltip-color: rgb(41, 41, 41);
+  position: absolute;
+  top: -40px;
+  background-color: var(--tooltip-color);
+  color: white;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 8px 12px;
+  font-weight: 600;
+  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.105);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.5s;
+}
+.tooltip::before {
+  position: absolute;
+  width: 10px;
+  height: 10px;
   transform: rotate(45deg);
+  content: "";
+  background-color: var(--tooltip-color);
+  bottom: -10%;
 }
-.bin-button:hover {
-  background-color: rgb(255, 0, 0);
+.deleteButton:hover .tooltip {
+  opacity: 1;
 }
-.bin-button:active {
-  transform: scale(0.9);
-}
-
 </style>

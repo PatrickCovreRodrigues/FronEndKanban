@@ -3,19 +3,22 @@
     <v-text-field
       v-model="formData.name"
       label="Name"
+      :rules="[rules.required]"
     ></v-text-field>
 
     <v-text-field
-      v-model="formData.description"
+      v-model="formData.description_project"
       label="Description"
+      :rules="[rules.required]"
     ></v-text-field>
 
     <v-select
-      v-model="formData.select"
+      v-model="formData.customer_id"
       :items="customers"
       item-text="name"
       item-value="id"
       label="Select Customer"
+      :rules="[rules.required]"
     ></v-select>
 
     <v-btn type="submit">Submit</v-btn>
@@ -24,15 +27,16 @@
 
 <script>
 import axios from 'axios';
-import { useForm } from 'vee-validate';
+import { useForm, defineRule } from 'vee-validate';
+import { required } from '@vee-validate/rules';
 
 export default {
   data() {
     return {
       formData: {
         name: '',
-        description: '',
-        select: ''
+        description_project: '',
+        customer_id: null 
       },
       customers: [],
       url: 'http://127.0.0.1:8000/projects/', 
@@ -46,37 +50,45 @@ export default {
     async fetchCustomers() {
       try {
         const response = await axios.get(this.customersUrl);
-        this.customers = response.data;
+        this.customers = response.data.map(customer => ({
+          id: customer.id,
+          name: customer.name 
+        }));
+        console.log(this.customers);
       } catch (error) {
         console.error('Error fetching customers:', error);
+      } 
+    },
+    async submit() {
+      try {
+        const { id, ...payload } = this.formData;
+        const response = await axios.post(this.url, payload);
+        console.log(response.data);
+        alert('Project created successfully!');
+      } catch (error) {
+        console.error('Error creating project:', error.response.data);
+        alert('Failed to create project.');
       }
     }
   },
   setup() {
+    defineRule('required', required);
+
     const { handleSubmit, handleReset } = useForm({
       validationSchema: {
-        name: 'required|min:3',
-        description: 'required|min:3',
-        select: 'required'
-      },
-      select(value) {
-        if (value) return true;
-        return 'This field is required';
-      },
-    });
-
-    const submit = handleSubmit(async (values) => {
-      try {
-        const response = await axios.post(this.url, values);
-        console.log(response.data);
-        alert('Project created');
-      } catch (error) {
-        console.error(error);
-        alert('Error');
+        name: required,
+        description_project: required,
+        customer_id: required
       }
     });
-
-    return { submit, handleReset };
+    
+    return {
+      handleSubmit,
+      handleReset,
+      rules: {
+        required
+      }
+    };
   }
 };
 </script>

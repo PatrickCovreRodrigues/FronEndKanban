@@ -35,7 +35,7 @@ export default {
     },
     async fetchDeleteProject(id) {
       try {
-        const response = await axios.delete(this.url + '/1'); 
+        const response = await axios.delete(this.url + id); 
         console.log(response.data);
         this.fetchGetProjects();
       } catch (error) {
