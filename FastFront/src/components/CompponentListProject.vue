@@ -11,7 +11,9 @@
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title>Projetos</v-toolbar-title>
-          <button  @click="openPostProjectDialog" class="v-btn-creat">Criar Tarefa</button>
+          <button @click="openDialog" class="v-btn-create">Criar Projeto</button>
+          
+          <ComponentPostProject v-model="showDialog" />
         </v-toolbar>
       </template>
 
@@ -21,7 +23,7 @@
       </template>
     </v-data-table>
 
-     <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog v-model="dialog" max-width="500px">
       <v-card>
         <v-card-title>
           <span class="headline">Editar Projeto</span>
@@ -29,7 +31,10 @@
         <v-card-text>
           <v-form ref="form">
             <v-text-field v-model="editedItem.name" label="Nome"></v-text-field>
-            <v-text-field v-model="editedItem.description_project" label="Descrição"></v-text-field>
+            <v-text-field
+              v-model="editedItem.description_project"
+              label="Descrição"
+            ></v-text-field>
             <v-select
               v-model="editedItem.customer_id"
               :items="customers"
@@ -41,7 +46,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancelar</v-btn>
+          <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
           <v-btn color="blue darken-1" text @click="updateProject">Salvar</v-btn>
         </v-card-actions>
       </v-card>
@@ -51,21 +56,26 @@
 
 <script>
 import axios from "axios";
+import ComponentPostProject from "./ComponentPostProject.vue";
 
 export default {
+  components: {
+    ComponentPostProject,
+  },
   data: () => ({
     items: [],
-    customers: [], 
-    url: "http://127.0.0.1:8000/projects/", 
+    customers: [],
+    url: "http://127.0.0.1:8000/projects/",
     customersUrl: "http://127.0.0.1:8000/customers/",
     headers: [
-      { title: "ID", value: "id" },
-      { title: "Nome", value: "name" },
-      { title: "Descrição", value: "description_project" },
-      { title: "Cliente", value: "customer_id" },
-      { title: "Criado em", value: "created_at" },
-      { title: "Ações", value: "actions", sortable: false },
+      { text: "ID", value: "id" },
+      { text: "Nome", value: "name" },
+      { text: "Descrição", value: "description_project" },
+      { text: "Cliente", value: "customer_id" },
+      { text: "Criado em", value: "created_at" },
+      { text: "Ações", value: "actions", sortable: false },
     ],
+    showDialog: false,
     dialog: false,
     editedItem: {
       id: null,
@@ -76,10 +86,19 @@ export default {
   }),
   async created() {
     await this.fetchGetProjects();
-    await this.fetchDeleteProject();
     await this.fetchCustomers();
   },
   methods: {
+    openDialog() {
+      this.showDialog = true;
+    },
+    closeDialog() {
+      this.dialog = false;
+    },
+    editProject(item) {
+      this.editedItem = { ...item };
+      this.dialog = true;
+    },
     async fetchGetProjects() {
       try {
         const response = await axios.get(this.url);
@@ -91,7 +110,7 @@ export default {
     async fetchDeleteProject(id) {
       try {
         await axios.delete(`${this.url}${id}`);
-        this.fetchGetProjects(); 
+        this.fetchGetProjects();
       } catch (error) {
         console.error("Erro ao excluir projeto:", error);
       }
@@ -101,20 +120,18 @@ export default {
         const response = await axios.get(this.customersUrl);
         this.customers = response.data;
       } catch (error) {
-        console.error('Error fetching customers:', error);
+        console.error("Erro ao buscar clientes:", error);
       }
-    },
-    editProject(item) {
-      this.editedItem = { ...item };
-      this.dialog = true;
-    },
-    closeDialog(){
-      this.dialog = false;
     },
     async updateProject() {
       try {
-        const response = await axios.put(`${this.url}${this.editedItem.id}/`, this.editedItem);
-        const index = this.items.findIndex(item => item.id === this.editedItem.id);
+        const response = await axios.put(
+          `${this.url}${this.editedItem.id}/`,
+          this.editedItem
+        );
+        const index = this.items.findIndex(
+          (item) => item.id === this.editedItem.id
+        );
         if (index !== -1) {
           this.items.splice(index, 1, response.data);
         }
@@ -124,14 +141,6 @@ export default {
         console.error("Erro ao atualizar projeto:", error);
         alert("Erro ao atualizar projeto!");
       }
-    },
-    formatDate(date) {
-      if (!date) return "";
-      return new Date(date).toLocaleDateString("pt-BR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      });
     },
   },
 };
@@ -148,13 +157,13 @@ export default {
 .v-data-table {
   margin-top: 16px;
 }
-.v-btn-creat {
+.v-btn-create {
   margin: 20px;
   border: 1px solid #3f51b5;
   background-color: #3f51b5;
   color: white;
   border-radius: 4px;
-  width: 100px;
+  width: 120px;
   height: 40px;
 }
 </style>
