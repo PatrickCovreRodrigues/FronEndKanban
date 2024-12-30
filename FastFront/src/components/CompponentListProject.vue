@@ -1,7 +1,7 @@
 <template>
   <v-card class="mx-auto" max-width="800">
     <v-data-table
-      :items="items"
+      :items="formattedItems"
       :headers="headers"
       class="elevation-1"
       item-value="id"
@@ -84,11 +84,24 @@ export default {
       customer_id: null,
     },
   }),
+  computed: {
+    formattedItems() {
+      return this.items.map((item) => ({
+        ...item,
+        created_at: this.formatDate(item.created_at),
+      }));
+    },
+  },
   async created() {
     await this.fetchGetProjects();
     await this.fetchCustomers();
   },
   methods: {
+    formatDate(date) {
+      if (!date) return "";
+      const options = { day: "2-digit", month: "2-digit", year: "numeric" };
+      return new Date(date).toLocaleDateString("pt-BR", options);
+    },
     openDialog() {
       this.showDialog = true;
     },
