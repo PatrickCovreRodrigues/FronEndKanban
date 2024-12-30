@@ -1,34 +1,32 @@
 <template>
-  <v-container class="pa-16">
+  <v-container>
     <v-row>
-      <!-- Cada coluna é uma lista de status -->
+      <!-- Coluna para cada estado -->
       <v-col
-        v-for="(tasks, status) in taskLists"
-        :key="status"
+        v-for="state in states"
+        :key="state"
         cols="12"
-        md="3"
+        md="4"
       >
-        <v-card class="pa-2" outlined>
-          <v-card-title class="text-h6 text-center">{{ status }}</v-card-title>
-          <v-divider></v-divider>
+        <v-card>
+          <v-card-title>{{ state }}</v-card-title>
           <v-card-text>
-            <!-- Lista de Tarefas -->
-            <div
-              class="task-list"
-              @dragover.prevent
-              @drop="onDrop($event, status)"
-            >
-              <v-chip
-                v-for="(task) in tasks"
-                :key="task.id"
-                draggable="true"
-                @dragstart="onDragStart($event, task)"
-                class="ma-2"
-                outlined
+            <v-list>
+              <v-list-item
+                v-for="todo in filteredTodos(state)"
+                :key="todo.id"
               >
-                {{ task.name }}
-              </v-chip>
-            </div>
+                <v-list-item-content>
+                  <v-list-item-title>{{ todo.title }}</v-list-item-title>
+                  <v-list-item-subtitle>{{ todo.description_activity }}</v-list-item-subtitle>
+                </v-list-item-content>
+                <v-list-item-action>
+                  <!-- Botões de ação -->
+                  <v-btn small color="primary" @click="moveTask(todo, 'next')">Mover</v-btn>
+                  <v-btn small color="red" @click="deleteTask(todo.id)">Excluir</v-btn>
+                </v-list-item-action>
+              </v-list-item>
+            </v-list>
           </v-card-text>
         </v-card>
       </v-col>
@@ -36,66 +34,43 @@
   </v-container>
 </template>
 
+
 <script>
-import { ref } from "vue";
+import axios from "axios";
 
 export default {
-  name: "TaskBoard",
-  setup() {
-    // Tarefas por status
-    const taskLists = ref({
-      "A Fazer": [
-        { id: 1, name: "Planejar o projeto" },
-        { id: 2, name: "Escrever documentação inicial" },
-      ],
-      Fazendo: [{ id: 3, name: "Desenvolver componente principal" }],
-      "Stand By": [{ id: 4, name: "Aguardar revisão do cliente" }],
-      Feito: [{ id: 5, name: "Entregar versão final" }],
-    });
-
-    const draggedTask = ref(null);
-
-    const onDragStart = (event, task) => {
-      draggedTask.value = task;
-    };
-
-    const onDrop = (event, newStatus) => {
-      if (draggedTask.value) {
-        for (const status in taskLists.value) {
-          const index = taskLists.value[status].findIndex(
-            (t) => t.id === draggedTask.value.id
-          );
-          if (index > -1) {
-            taskLists.value[status].splice(index, 1);
-            break;
-          }
-        }
-
-        taskLists.value[newStatus].push(draggedTask.value);
-
-        draggedTask.value = null;
-      }
-    };
-
+  data() {
     return {
-      taskLists,
-      onDragStart,
-      onDrop,
+      todos: [],
+      states: ["Pendente", "A fazer", "Em progresso", "Em espera", "Feito"], // Baseado no enum TodoState
     };
+  },
+  methods: {
+    async fetchTodos() {
+      const response = await axios.get("http://127.0.0.1:8000/todos");
+      this.todos = response.data;
+    },
+    filteredTodos(state) {
+      return this.todos.filter((todo) => todo.state === state);
+    },
+    async moveTask(todo, direction) {
+      const stateOrder = this.states;
+      const currentIndex = stateOrder.indexOf(todo.state);
+      const newIndex =
+        direction === "next" ? currentIndex + 1 : currentIndex - 1;
+      if (newIndex >= 0 && newIndex < stateOrder.length) {
+        todo.state = stateOrder[newIndex];
+        await axios.put(`/todos/${todo.id}`, { state: todo.state });
+        this.fetchTodos();
+      }
+    },
+    async deleteTask(id) {
+      await axios.delete(`/todos/${id}`);
+      this.fetchTodos();
+    },
+  },
+  mounted() {
+    this.fetchTodos();
   },
 };
 </script>
-
-<style>
-.task-list {
-    min-height: 150px;
-    padding: 8px;
-    background-color: #020317a5;
-    border: 1px dashed #ddd;
-    border-radius: 4px;
-}
-
-.task-list > *:not(:last-child) {
-  margin-bottom: 8px;
-}
-</style>
