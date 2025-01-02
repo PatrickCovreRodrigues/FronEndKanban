@@ -17,9 +17,15 @@
         </v-toolbar>
       </template>
 
-      <template v-slot:[`item.actions`]="{ item }">
+       <template v-slot:[`item.actions`]="{ item }">
         <v-icon @click="editProject(item)">mdi-pencil</v-icon>
         <v-icon @click="fetchDeleteProject(item.id)" class="red--text">mdi-delete</v-icon>
+        <v-icon
+          @click="navigateToProject(item.id)"
+          class="blue--text"
+        >
+          mdi-arrow-right
+        </v-icon>
       </template>
     </v-data-table>
 
@@ -97,6 +103,9 @@ export default {
     await this.fetchCustomers();
   },
   methods: {
+    navigateToProject(id) {
+      this.$router.push(`/projects/${id}`);
+    },
     formatDate(date) {
       if (!date) return "";
       const options = { day: "2-digit", month: "2-digit", year: "numeric" };
