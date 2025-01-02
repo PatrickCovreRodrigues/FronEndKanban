@@ -12,7 +12,7 @@ const routes = [
     path: '/projects/:id',
     name: 'ProjectTodos',
     component: ComponentStatusTodos,
-    props: true, // Passa o ID do projeto como prop para o componente
+    props: true,
   },
 ]
 
