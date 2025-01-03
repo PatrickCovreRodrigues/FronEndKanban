@@ -1,43 +1,31 @@
 <template>
-  <v-row>
-    <v-col v-for="status in statuses" :key="status" cols="12" md="4">
-      <v-card>
-        <v-card-title>{{ status }}</v-card-title>
-        <v-card-text>
-          <draggable
-            v-model="tasks[status]"
-            :group="{ name: 'tasks', pull: true, put: true }"
-            @end="updateTaskStatus"
-            item-key="id"
-          >
-            <template #item="{ element }">
-              <v-chip
-                :key="element.id"
-                class="ma-2"
-                color="primary"
-              >
-                {{ element.name }}
-              </v-chip>
-            </template>
-          </draggable>
-        </v-card-text>
-      </v-card>
-    </v-col>
-  </v-row>
+  <v-container>
+    <h1>{{ project.name }}</h1>
+    <v-row>
+      <v-col v-for="status in statuses" :key="status" cols="4">
+        <h2>{{ status }}</h2>
+        <v-card
+          v-for="activity in activities[status]"
+          :key="activity.id"
+          class="mb-3"
+        >
+          <v-card-title>{{ activity.name }}</v-card-title>
+          <v-card-subtitle>{{ activity.description_activity }}</v-card-subtitle>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
 import axios from 'axios';
-import draggable from 'vuedraggable';
 
 export default {
-  components: {
-    draggable,
-  },
   data() {
     return {
+      project: {},
       statuses: ['PENDING', 'TODO', 'INPROGRESS', 'WAITING', 'DONE'],
-      tasks: {
+      activities: {
         PENDING: [],
         TODO: [],
         INPROGRESS: [],
@@ -46,48 +34,24 @@ export default {
       },
     };
   },
-  methods: {
-    // Função para atualizar o status das tarefas no backend
-    async updateTaskStatus() {
-      const tasks = this.tasks; // Estado local das tarefas
-      const updates = Object.keys(tasks).flatMap(status => {
-        return tasks[status].map(task => {
-          return {
-            taskId: task.id,
-            newStatus: status,
-          };
-        });
-      });
+  async created() {
+    const projectId = parseInt(this.$route.params.id, 10); // Converter para número se necessário
+    try {
+      // Buscar os detalhes do projeto
+      const projectResponse = await axios.get(`http://localhost:8000/projects/${projectId}`);
+      this.project = projectResponse.data;
 
-      try {
-        // Usando axios.patch para atualizar o status de cada tarefa no backend
-        for (const update of updates) {
-          await axios.patch(`/api/activitys/${update.taskId}/status/`, {
-            status: update.newStatus,
-          });
+      // Buscar as atividades relacionadas
+      const activitiesResponse = await axios.get('http://localhost:8000/activitys');
+      activitiesResponse.data.forEach((activity) => {
+        if (activity.project_id === projectId) {
+          // Adicionar a atividade ao status correspondente
+          this.activities[activity.status].push(activity);
         }
-      } catch (error) {
-        console.error('Erro ao atualizar status:', error);
-      }
-    },
-
-    // Função para carregar as tarefas do backend ao iniciar o componente
-    async loadTasks() {
-      try {
-        const response = await axios.get('/api/activitys');
-        const tasks = response.data;
-        
-        // Organize tasks based on status
-        tasks.forEach(task => {
-          this.tasks[task.status].push(task);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar tarefas:', error);
-      }
-    },
-  },
-  created() {
-    this.loadTasks();
+      });
+    } catch (error) {
+      console.error('Erro ao carregar detalhes do projeto:', error);
+    }
   },
 };
 </script>
