@@ -1,91 +1,93 @@
 <template>
-  <div class="kanban">
-    <div
-      v-for="status in statuses"
-      :key="status"
-      class="kanban-column"
-    >
-      <h3>{{ status }}</h3>
-      <draggable
-        :list="groupedTodos[status]"
-        group="todos"
-        @end="onDrop"
-      >
-        <div v-for="todo in groupedTodos[status]" :key="todo.id" class="todo-card">
-          {{ todo.title }}
-        </div>
-      </draggable>
-    </div>
-  </div>
+  <v-row>
+    <v-col v-for="status in statuses" :key="status" cols="12" md="4">
+      <v-card>
+        <v-card-title>{{ status }}</v-card-title>
+        <v-card-text>
+          <draggable
+            v-model="tasks[status]"
+            :group="{ name: 'tasks', pull: true, put: true }"
+            @end="updateTaskStatus"
+            item-key="id"
+          >
+            <template #item="{ element }">
+              <v-chip
+                :key="element.id"
+                class="ma-2"
+                color="primary"
+              >
+                {{ element.name }}
+              </v-chip>
+            </template>
+          </draggable>
+        </v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
-import draggable from "vuedraggable";
-import axios from "axios";
+import axios from 'axios';
+import draggable from 'vuedraggable';
 
 export default {
-  components: { draggable },
-  data: () => ({
-    todos: [], // Lista completa de atividades
-    statuses: ["Pendente", "A fazer", "Em progresso", "Em espera", "Feito"], // Colunas do Kanban
-  }),
-  computed: {
-    groupedTodos() {
-      // Agrupar atividades por status
-      return this.statuses.reduce((acc, status) => {
-        acc[status] = this.todos.filter((todo) => todo.state === status);
-        return acc;
-      }, {});
-    },
+  components: {
+    draggable,
   },
-  async created() {
-    await this.fetchTodos();
+  data() {
+    return {
+      statuses: ['PENDING', 'TODO', 'INPROGRESS', 'WAITING', 'DONE'],
+      tasks: {
+        PENDING: [],
+        TODO: [],
+        INPROGRESS: [],
+        WAITING: [],
+        DONE: [],
+      },
+    };
   },
   methods: {
-    async fetchTodos() {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/todos/");
-        this.todos = response.data;
-      } catch (error) {
-        console.error("Erro ao buscar atividades:", error);
-      }
-    },
-    async onDrop(event) {
-      // Recuperar o ID e o novo status do item arrastado
-      const todo = event.item._underlying_vm_;
-      const newState = this.statuses[event.to.dataset.index];
-
-      // Atualizar no banco de dados
-      try {
-        await axios.put(`http://127.0.0.1:8000/todos/${todo.id}`, {
-          ...todo,
-          state: newState,
+    // Função para atualizar o status das tarefas no backend
+    async updateTaskStatus() {
+      const tasks = this.tasks; // Estado local das tarefas
+      const updates = Object.keys(tasks).flatMap(status => {
+        return tasks[status].map(task => {
+          return {
+            taskId: task.id,
+            newStatus: status,
+          };
         });
-        this.fetchTodos(); // Atualizar a lista após o drop
+      });
+
+      try {
+        // Usando axios.patch para atualizar o status de cada tarefa no backend
+        for (const update of updates) {
+          await axios.patch(`/api/activitys/${update.taskId}/status/`, {
+            status: update.newStatus,
+          });
+        }
       } catch (error) {
-        console.error("Erro ao atualizar atividade:", error);
+        console.error('Erro ao atualizar status:', error);
       }
     },
+
+    // Função para carregar as tarefas do backend ao iniciar o componente
+    async loadTasks() {
+      try {
+        const response = await axios.get('/api/activitys');
+        const tasks = response.data;
+        
+        // Organize tasks based on status
+        tasks.forEach(task => {
+          this.tasks[task.status].push(task);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar tarefas:', error);
+      }
+    },
+  },
+  created() {
+    this.loadTasks();
   },
 };
 </script>
-
-<style>
-.kanban {
-  display: flex;
-  gap: 20px;
-}
-.kanban-column {
-  width: 200px;
-  background: #f4f4f4;
-  padding: 10px;
-  border-radius: 5px;
-}
-.todo-card {
-  background: white;
-  margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-</style>
