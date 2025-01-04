@@ -8,23 +8,34 @@
           v-for="activity in activities[status]"
           :key="activity.id"
           class="mb-3"
+          draggable="true"
+          @dragstart="onDragStart(activity)"
         >
           <v-card-title>{{ activity.name }}</v-card-title>
           <v-card-subtitle>{{ activity.description_activity }}</v-card-subtitle>
         </v-card>
+        <!-- Drop Area -->
+        <div
+          class="drop-area"
+          @dragover.prevent
+          @drop="onDrop(status)"
+          style="border: 2px dashed #ccc; padding: 1em; text-align: center;"
+        >
+          Solte aqui para mover para {{ status }}
+        </div>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
     return {
       project: {},
-      statuses: ['PENDING', 'TODO', 'INPROGRESS', 'WAITING', 'DONE'],
+      statuses: ["PENDING", "TODO", "INPROGRESS", "WAITING", "DONE"],
       activities: {
         PENDING: [],
         TODO: [],
@@ -32,25 +43,56 @@ export default {
         WAITING: [],
         DONE: [],
       },
+      draggedActivity: null, // Atividade sendo arrastada
     };
   },
+  methods: {
+    onDragStart(activity) {
+      // Armazena a atividade sendo arrastada
+      this.draggedActivity = activity;
+    },
+async onDrop(newStatus) {
+  if (!this.draggedActivity || !this.statuses.includes(newStatus)) {
+    console.error("Status inválido ou nenhuma atividade arrastada");
+    return;
+  }
+
+  try {
+    await axios.patch(`http://localhost:8000/activitys/${this.draggedActivity.id}/status/`, {
+      status: newStatus, // Envia o status correto
+    });
+
+    const currentStatus = this.draggedActivity.status;
+
+    // Atualiza localmente
+    this.activities[currentStatus] = this.activities[currentStatus].filter(
+      (activity) => activity.id !== this.draggedActivity.id
+    );
+
+    this.draggedActivity.status = newStatus;
+    this.activities[newStatus].push(this.draggedActivity);
+
+    this.draggedActivity = null; // Reseta após mover
+  } catch (error) {
+    console.error("Erro ao mover atividade:", error.response?.data || error.message);
+    alert("Não foi possível mover a atividade. Tente novamente.");
+  }
+}
+  },
   async created() {
-    const projectId = parseInt(this.$route.params.id, 10); // Converter para número se necessário
+    const projectId = parseInt(this.$route.params.id, 10);
     try {
-      // Buscar os detalhes do projeto
       const projectResponse = await axios.get(`http://localhost:8000/projects/${projectId}`);
       this.project = projectResponse.data;
 
-      // Buscar as atividades relacionadas
-      const activitiesResponse = await axios.get('http://localhost:8000/activitys');
+      const activitiesResponse = await axios.get("http://localhost:8000/activitys");
       activitiesResponse.data.forEach((activity) => {
         if (activity.project_id === projectId) {
-          // Adicionar a atividade ao status correspondente
           this.activities[activity.status].push(activity);
         }
       });
     } catch (error) {
-      console.error('Erro ao carregar detalhes do projeto:', error);
+      console.error("Erro ao carregar detalhes do projeto:", error);
     }
   },
 };
