@@ -1,6 +1,9 @@
 <template>
   <v-container>
     <h1>{{ project.name }}</h1>
+    <button @click="openDialog" class="v-btn-create">Criar Atividade</button>
+          
+    <ComponentPostActivity v-model="showDialog" :projectId="project.id" />
     <v-row>
       <v-col v-for="status in statuses" :key="status" cols="4">
         <h2>{{ status }}</h2>
@@ -43,6 +46,7 @@ export default {
         WAITING: [],
         DONE: [],
       },
+      showDialog: false,
       draggedActivity: null, // Atividade sendo arrastada
     };
   },
@@ -50,6 +54,12 @@ export default {
     onDragStart(activity) {
       // Armazena a atividade sendo arrastada
       this.draggedActivity = activity;
+    },
+     openDialog() {
+      this.showDialog = true;
+    },
+    closeDialog() {
+      this.showDialog = false;
     },
 async onDrop(newStatus) {
   if (!this.draggedActivity || !this.statuses.includes(newStatus)) {

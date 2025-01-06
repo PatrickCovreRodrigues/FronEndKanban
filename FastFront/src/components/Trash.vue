@@ -6,7 +6,7 @@
         </v-card-title>
         <v-card-text>
           <v-form ref="form">
-            <v-text-field v-model="editedItem.name" label="Nome"></v-text-field>
+            <v-text-field v-model="editedItem.name" label="Nome2"></v-text-field>
             <v-text-field v-model="editedItem.description_project" label="Descrição"></v-text-field>
             <v-select
               v-model="editedItem.customer_id"
