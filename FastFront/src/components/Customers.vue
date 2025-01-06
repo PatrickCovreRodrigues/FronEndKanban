@@ -19,12 +19,6 @@
       <template v-slot:[`item.actions`]="{ item }">
         <v-icon @click="editCustomer(item)">mdi-pencil</v-icon>
         <v-icon @click="fetchDeleteCustomer(item.id)" class="red--text">mdi-delete</v-icon>
-        <v-icon
-          @click="navigateToCustomer(item.id)"
-          class="blue--text"
-        >
-          mdi-arrow-right
-        </v-icon>
       </template>
     </v-data-table>
 
@@ -62,11 +56,11 @@ export default {
     customers: [],
     url: "http://127.0.0.1:8000/customers/",
     headers: [
-      { text: "ID", value: "id" },
-      { text: "Nome", value: "name" },
-      { text: "Email", value: "email" },
-      { text: "Descrição", value: "description" },
-      { text: "Ações", value: "actions", sortable: false },
+      { title: "ID", value: "id" },
+      { title: "Nome", value: "name" },
+      { title: "Email", value: "email" },
+      { title: "Descrição", value: "description" },
+      { title: "Ações", value: "actions", sortable: false },
     ],
     showDialog: false,
     dialog: false,
