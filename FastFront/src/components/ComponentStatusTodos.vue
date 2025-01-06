@@ -1,9 +1,11 @@
 <template>
   <v-container>
-    <h1>{{ project.name }}</h1>
-    <button @click="openDialog" class="v-btn-create">Criar Atividade</button>
-          
-    <ComponentPostActivity v-model="showDialog" :projectId="project.id" />
+      <v-toolbar flat>
+        <h1>{{ project.name }}</h1>
+        <v-spacer></v-spacer>
+        <button @click="openDialog" class="v-btn-create">Criar Atividade</button>    
+        <ComponentPostActivity v-model="showDialog" :projectId="project.id" />
+      </v-toolbar>
     <v-row>
       <v-col v-for="status in statuses" :key="status" cols="4">
         <h2>{{ status }}</h2>
@@ -107,3 +109,15 @@ async onDrop(newStatus) {
   },
 };
 </script>
+
+<style>
+.v-btn-create {
+  margin: 20px;
+  border: 1px solid #3f51b5;
+  background-color: #3f51b5;
+  color: white;
+  border-radius: 4px;
+  width: 120px;
+  height: 40px;
+}
+</style>

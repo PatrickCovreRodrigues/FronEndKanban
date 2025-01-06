@@ -58,6 +58,7 @@
       </v-card>
     </v-dialog>
   </v-card>
+  <ComponentNavBar/>
 </template>
 
 <script>
@@ -92,10 +93,14 @@ export default {
   }),
   computed: {
     formattedItems() {
-      return this.items.map((item) => ({
-        ...item,
-        created_at: this.formatDate(item.created_at),
-      }));
+      return this.items.map((item) => {
+        const customer = this.customers.find(c => c.id === item.customer_id);
+        return {
+          ...item,
+          created_at: this.formatDate(item.created_at),
+          customer_id: customer ? customer.name : "",
+        };
+      });
     },
   },
   async created() {

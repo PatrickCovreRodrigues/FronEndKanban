@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import CompponentListProject from '@/components/CompponentListProject.vue'
 import ComponentStatusTodos from '@/components/ComponentStatusTodos.vue'
+import Customers from '@/components/Customers.vue'
 
 const routes = [
   {
@@ -14,6 +15,11 @@ const routes = [
     component: ComponentStatusTodos,
     props: true,
   },
+  {
+    path: '/customer',
+    name: 'Customer',
+    component: Customers,
+  }
 ]
 
 const router = createRouter({
