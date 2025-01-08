@@ -42,6 +42,7 @@
       </v-card>
     </v-dialog>
   </v-card>
+  <ComponentNavBar/>
 </template>
 
 <script>
