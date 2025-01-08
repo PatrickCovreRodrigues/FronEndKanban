@@ -85,7 +85,7 @@ export default {
       }
     },
     closeDialog() {
-      this.$emit("update:showDialog", false);
+      this.showDialog = false;
     },
     updateDialog(value) {
       this.$emit("update:showDialog", value);

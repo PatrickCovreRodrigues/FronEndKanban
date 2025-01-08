@@ -53,29 +53,34 @@ export default {
     };
   },
   methods: {
-    async submit() {
-      try {
-        console.log("Valor de projectId:", this.projectId);
-        const dataToSend = {
-          ...this.formData,
-          project_id: this.projectId,
-          status: "PENDING",
-        };
-        console.log("Dados enviados para o backend:", dataToSend);
-
-        await axios.post(`http://127.0.0.1:8000/activitys/`, dataToSend);
-        alert("Atividade criada com sucesso!");
-        this.closeDialog();
-      } catch (error) {
-        console.error("Erro ao criar atividade:", error.response?.data || error.message);
-      }
-    },
-    closeDialog() {
-      this.$emit("update:showDialog", false);
-    },
-    updateDialog(value) {
-      this.$emit("update:showDialog", value);
-    },
+  closeDialog() {
+    this.showDialog = false;
   },
+  async submit() {
+    if (!this.formData.name || !this.formData.description_activity) {
+      alert("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    try {
+      console.log("Valor de projectId:", this.projectId);
+      const dataToSend = {
+        ...this.formData,
+        project_id: this.projectId,
+        status: "PENDING",
+      };
+      console.log("Dados enviados para o backend:", dataToSend);
+
+      await axios.post(`http://127.0.0.1:8000/activitys/`, dataToSend);
+      alert("Atividade criada com sucesso!");
+      this.closeDialog();
+    } catch (error) {
+      console.error("Erro ao criar atividade:", error.response?.data || error.message);
+    }
+  },
+  updateDialog(value) {
+    this.$emit("update:showDialog", value);
+  },
+}
 };
 </script>

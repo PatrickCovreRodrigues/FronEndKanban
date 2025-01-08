@@ -60,9 +60,6 @@ export default {
      openDialog() {
       this.showDialog = true;
     },
-    closeDialog() {
-      this.showDialog = false;
-    },
 async onDrop(newStatus) {
   if (!this.draggedActivity || !this.statuses.includes(newStatus)) {
     console.error("Status inválido ou nenhuma atividade arrastada");
