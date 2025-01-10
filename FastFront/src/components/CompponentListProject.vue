@@ -1,5 +1,8 @@
 <template>
-  <v-card class="mx-auto" max-width="800">
+  <v-card
+    class="mx-auto"
+    max-width="800"
+  >
     <v-data-table
       :items="formattedItems"
       :headers="headers"
@@ -8,52 +11,85 @@
       item-key="id"
       dense
     >
-      <template v-slot:top>
+      <template #top>
         <v-toolbar flat>
           <v-toolbar-title>Projetos</v-toolbar-title>
-          <button @click="openDialog" class="v-btn-create">Criar Projeto</button>
+          <button
+            class="v-btn-create"
+            @click="openDialog"
+          >
+            Criar Projeto
+          </button>
           
-          <ComponentPostProject v-model="showDialog" @project-created="fetchGetProjects" />
+          <ComponentPostProject
+            v-model="showDialog"
+            @project-created="fetchGetProjects"
+          />
         </v-toolbar>
       </template>
 
-       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon @click="editProject(item)">mdi-pencil</v-icon>
-        <v-icon @click="fetchDeleteProject(item.id)" class="red--text">mdi-delete</v-icon>
+      <template #[`item.actions`]="{ item }">
+        <v-icon @click="editProject(item)">
+          mdi-pencil
+        </v-icon>
         <v-icon
-          @click="navigateToProject(item.id)"
+          class="red--text"
+          @click="fetchDeleteProject(item.id)"
+        >
+          mdi-delete
+        </v-icon>
+        <v-icon
           class="blue--text"
+          @click="navigateToProject(item.id)"
         >
           mdi-arrow-right
         </v-icon>
       </template>
     </v-data-table>
 
-    <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog
+      v-model="dialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title>
           <span class="headline">Editar Projeto</span>
         </v-card-title>
         <v-card-text>
           <v-form ref="form">
-            <v-text-field v-model="editedItem.name" label="Nome"></v-text-field>
+            <v-text-field
+              v-model="editedItem.name"
+              label="Nome"
+            />
             <v-text-field
               v-model="editedItem.description_project"
               label="Descrição"
-            ></v-text-field>
+            />
             <v-select
               v-model="editedItem.customer_id"
               :items="customers"
               item-title="name"
               item-value="id"
               label="Cliente"
-            ></v-select>
+            />
           </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
-          <v-btn color="blue darken-1" text @click="updateProject">Salvar</v-btn>
+          <v-spacer />
+          <v-btn
+            color="red darken-1"
+            text
+            @click="closeDialog"
+          >
+            Cancelar
+          </v-btn>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="updateProject"
+          >
+            Salvar
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -63,6 +99,7 @@
 <script>
 import axios from "axios";
 import ComponentPostProject from "./ComponentPostProject.vue";
+import { toast } from 'vue3-toastify';
 
 export default {
   components: {
@@ -137,8 +174,10 @@ export default {
       try {
         await axios.delete(`${this.url}${id}`);
         this.fetchGetProjects();
+        toast.success("Projeto excluído com sucesso!"); // Exibe o toast de sucesso
       } catch (error) {
         console.error("Erro ao excluir projeto:", error);
+        toast.error("Erro ao excluir projeto!"); // Exibe o toast de erro
       }
     },
     async fetchCustomers() {
@@ -149,14 +188,17 @@ export default {
         console.error("Erro ao buscar clientes:", error);
       }
     },
+
     async updateProject() {
       try {
+        const updatedData = {
+          ...this.editedItem,
+          customer_id: this.customers.find(c => c.name === this.editedItem.customer_id)?.id
+        };
+        console.log("Dados atualizados:", updatedData); // Adicione esta linha para debug
         const response = await axios.put(
           `${this.url}${this.editedItem.id}/`,
-          {
-            ...this.editedItem,
-            customer_id: this.customers.find(c => c.name === this.editedItem.customer_id)?.id
-          }
+          updatedData
         );
         const index = this.items.findIndex(
           (item) => item.id === this.editedItem.id
@@ -165,11 +207,11 @@ export default {
           this.items.splice(index, 1, response.data);
         }
         this.dialog = false;
-        alert("Projeto atualizado com sucesso!");
+        toast.success("Projeto atualizado com sucesso!"); // Exibe o toast de sucesso
         this.fetchGetProjects(); // Atualiza a lista de projetos
       } catch (error) {
         console.error("Erro ao atualizar projeto:", error);
-        alert("Erro ao atualizar projeto!");
+        toast.error("Erro ao atualizar projeto!"); // Exibe o toast de erro
       }
     }
   },

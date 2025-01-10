@@ -38,6 +38,8 @@
 <script>
 import axios from "axios";
 
+import { toast } from 'vue3-toastify';
+
 export default {
   props: {
     value: Boolean, // 'value' será a prop que recebe o estado de showDialog
@@ -73,15 +75,16 @@ export default {
           this.dialog = false; // Fecha o diálogo após sucesso
           this.$emit("customerCreated", response.data); // Emite evento com o novo cliente
           this.customer = { name: "", email: "", description: "" }; // Limpa os campos
-          alert("Cliente criado com sucesso!");
+          toast.success("Cliente criado com sucesso!"); // Exibe o toast de sucesso
         } catch (error) {
           console.error("Erro ao criar cliente:", error);
-          alert("Erro ao criar cliente!");
+          toast.error("Erro ao criar cliente!"); // Exibe o toast de erro
         }
       }
     }
   }
 };
+
 </script>
 
 <style scoped>

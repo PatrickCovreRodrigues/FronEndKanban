@@ -1,12 +1,15 @@
 <template>
-  <v-bottom-navigation :elevation="24" grow>
-    <v-btn :to="'/'" >
-      <IconClipboardSearch stroke={2} />
+  <v-bottom-navigation
+    :elevation="24"
+    grow
+  >
+    <v-btn :to="'/'">
+      <IconClipboardSearch stroke="{2}" />
       <span>Ir para Projeto</span>
     </v-btn>
 
-    <v-btn :to="'/customer'" >
-      <IconUserPlus stroke={2} />
+    <v-btn :to="'/customer'">
+      <IconUserPlus stroke="{2}" />
       <span>Ir para Cliente</span>
     </v-btn>
   </v-bottom-navigation>

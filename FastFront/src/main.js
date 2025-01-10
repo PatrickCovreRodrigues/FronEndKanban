@@ -12,6 +12,8 @@ import { createVuetify } from 'vuetify'
 import 'vuetify/styles' // Importa os estilos do Vuetify
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import Vue3Toastify, { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css'; // Importa o CSS do Vue3Toastify
 import router from './router'
 
 // Components
@@ -43,6 +45,9 @@ const app = createApp(App)
 
 registerPlugins(app)
 
+app.use(toast, {
+  autoclose: 3000,
+});
 app.use(vuetify)
 app.use(router);
 

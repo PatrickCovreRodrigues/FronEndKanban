@@ -1,21 +1,28 @@
 <template>
-  <v-dialog :value="showDialog" @input="updateDialog" max-width="500px">
+  <v-dialog
+    :value="showDialog"
+    max-width="500px"
+    @input="updateDialog"
+  >
     <v-card>
       <v-card-title>
         <span class="headline">Criar Projeto</span>
       </v-card-title>
       <v-card-text>
-        <v-form ref="form" @submit.prevent="submit">
+        <v-form
+          ref="form"
+          @submit.prevent="submit"
+        >
           <v-text-field
             v-model="formData.name"
             label="Nome"
             :rules="[rules.required]"
-          ></v-text-field>
+          />
           <v-text-field
             v-model="formData.description_project"
             label="Descrição"
             :rules="[rules.required]"
-          ></v-text-field>
+          />
           <v-select
             v-model="formData.customer_id"
             :items="customers"
@@ -23,11 +30,23 @@
             item-value="id"
             label="Cliente"
             :rules="[rules.required]"
-          ></v-select>
+          />
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="red darken-1" text @click="closeDialog">Cancelar</v-btn>
-            <v-btn type="submit" color="blue darken-1" text>Salvar</v-btn>
+            <v-spacer />
+            <v-btn
+              color="red darken-1"
+              text
+              @click="closeDialog"
+            >
+              Cancelar
+            </v-btn>
+            <v-btn
+              type="submit"
+              color="blue darken-1"
+              text
+            >
+              Salvar
+            </v-btn>
           </v-card-actions>
         </v-form>
       </v-card-text>
@@ -37,6 +56,8 @@
 
 <script>
 import axios from "axios";
+
+import { toast } from 'vue3-toastify';
 
 export default {
   props: {
@@ -78,19 +99,21 @@ export default {
     async submit() {
       try {
         await axios.post(this.url, this.formData);
-        alert("Projeto criado com sucesso!");
+        toast.success("Projeto criado com sucesso!"); // Exibe o toast de sucesso
         this.$emit("project-created"); // Emite o evento quando o projeto é criado
         this.closeDialog();
       } catch (error) {
         console.error("Erro ao criar projeto:", error);
+        toast.error("Erro ao criar projeto!"); // Exibe o toast de erro
       }
     },
     closeDialog() {
-      this.showDialog = false;
+      this.$emit("update:showDialog", false);
     },
     updateDialog(value) {
       this.$emit("update:showDialog", value);
     },
   },
 };
+
 </script>

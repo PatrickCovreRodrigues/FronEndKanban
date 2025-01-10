@@ -2,12 +2,25 @@
   <v-container>
     <v-toolbar flat>
       <h1>{{ project.name }}</h1>
-      <v-spacer></v-spacer>
-      <button @click="openDialog" class="v-btn-create">Criar Atividade</button>
-      <ComponentPostActivity v-model="showDialog" :projectId="project.id" />
+      <v-spacer />
+      <button
+        class="v-btn-create"
+        @click="openDialog"
+      >
+        Criar Atividade
+      </button>
+      <ComponentPostActivity
+        v-model="showDialog"
+        :project-id="project.id"
+        @activity-created="fetchActivities"
+      />
     </v-toolbar>
     <v-row>
-      <v-col v-for="status in statuses" :key="status" cols="4">
+      <v-col
+        v-for="status in statuses"
+        :key="status"
+        cols="4"
+      >
         <h2>{{ status }}</h2>
         <v-card
           v-for="activity in activities[status]"
@@ -19,21 +32,34 @@
         >
           <v-card-title>Titulo: {{ activity.name }}</v-card-title>
           <v-card-subtitle>Descrição: {{ activity.description_activity }}</v-card-subtitle>
-          <v-icon icon @click.stop="openDeleteDialog(activity)" class="red--text">mdi-delete</v-icon>
+          <v-icon
+            icon
+            class="red--text"
+            @click.stop="openDeleteDialog(activity)"
+          >
+            mdi-delete
+          </v-icon>
         </v-card>
         <!-- Drop Area -->
         <div
           class="drop-area"
+          style="border: 2px dashed #ccc; padding: 1em; text-align: center;"
           @dragover.prevent
           @drop="onDrop(status)"
-          style="border: 2px dashed #ccc; padding: 1em; text-align: center;"
         >
           Solte aqui para mover para {{ status }}
         </div>
       </v-col>
     </v-row>
-    <ComponentUpdateActivity v-model="showUpdateDialog" :activity="selectedActivity" />
-    <ComponentDeleteActivity v-model="showDeleteDialog" :activity="selectedActivity" />
+    <ComponentUpdateActivity
+      v-model="showUpdateDialog"
+      :activity="selectedActivity"
+    />
+    <ComponentDeleteActivity
+      v-model="showDeleteDialog"
+      :activity="selectedActivity"
+      @activity-deleted="fetchActivities"
+    />
   </v-container>
 </template>
 
@@ -66,6 +92,17 @@ export default {
       draggedActivity: null,
       selectedActivity: null,
     };
+  },
+  async created() {
+    const projectId = parseInt(this.$route.params.id, 10);
+    try {
+      const projectResponse = await axios.get(`http://localhost:8000/projects/${projectId}`);
+      this.project = projectResponse.data;
+
+      await this.fetchActivities();
+    } catch (error) {
+      console.error("Erro ao carregar detalhes do projeto:", error);
+    }
   },
   methods: {
     onDragStart(activity) {
@@ -108,26 +145,29 @@ export default {
         alert("Não foi possível mover a atividade. Tente novamente.");
       }
     },
-  },
-  async created() {
-    const projectId = parseInt(this.$route.params.id, 10);
-    try {
-      const projectResponse = await axios.get(`http://localhost:8000/projects/${projectId}`);
-      this.project = projectResponse.data;
-
-      const activitiesResponse = await axios.get("http://localhost:8000/activitys");
-      activitiesResponse.data.forEach((activity) => {
-        if (activity.project_id === projectId) {
-          this.activities[activity.status].push(activity);
-        }
-      });
-    } catch (error) {
-      console.error("Erro ao carregar detalhes do projeto:", error);
-    }
+    async fetchActivities() {
+      const projectId = parseInt(this.$route.params.id, 10);
+      try {
+        const activitiesResponse = await axios.get("http://localhost:8000/activitys");
+        this.activities = {
+          PENDING: [],
+          TODO: [],
+          INPROGRESS: [],
+          WAITING: [],
+          DONE: [],
+        };
+        activitiesResponse.data.forEach((activity) => {
+          if (activity.project_id === projectId) {
+            this.activities[activity.status].push(activity);
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao carregar atividades:", error);
+      }
+    },
   },
 };
 </script>
-
 
 <style>
 h1{
