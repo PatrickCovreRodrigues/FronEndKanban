@@ -3,6 +3,7 @@
     <v-main>
       <router-view />
     </v-main>
+    <ComponentNavBar/>
   </v-app>
 </template>
 

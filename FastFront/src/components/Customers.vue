@@ -11,7 +11,7 @@
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title>Clientes</v-toolbar-title>
-          <v-btn @click="openDialog" class="v-btn-create">Criar Cliente</v-btn>
+          <button @click="openDialog" class="v-btn-create">Criar Cleinte</button>
           <ComponentPostCustomer v-model="showDialog" />
         </v-toolbar>
       </template>
@@ -42,7 +42,6 @@
       </v-card>
     </v-dialog>
   </v-card>
-  <ComponentNavBar/>
 </template>
 
 <script>

@@ -13,7 +13,7 @@
           <v-toolbar-title>Projetos</v-toolbar-title>
           <button @click="openDialog" class="v-btn-create">Criar Projeto</button>
           
-          <ComponentPostProject v-model="showDialog" />
+          <ComponentPostProject v-model="showDialog" @project-created="fetchGetProjects" />
         </v-toolbar>
       </template>
 
@@ -58,7 +58,6 @@
       </v-card>
     </v-dialog>
   </v-card>
-  <ComponentNavBar/>
 </template>
 
 <script>
@@ -151,27 +150,28 @@ export default {
       }
     },
     async updateProject() {
-  try {
-    const response = await axios.put(
-      `${this.url}${this.editedItem.id}/`,
-      {
-        ...this.editedItem,
-        customer_id: this.customers.find(c => c.name === this.editedItem.customer_id)?.id
+      try {
+        const response = await axios.put(
+          `${this.url}${this.editedItem.id}/`,
+          {
+            ...this.editedItem,
+            customer_id: this.customers.find(c => c.name === this.editedItem.customer_id)?.id
+          }
+        );
+        const index = this.items.findIndex(
+          (item) => item.id === this.editedItem.id
+        );
+        if (index !== -1) {
+          this.items.splice(index, 1, response.data);
+        }
+        this.dialog = false;
+        alert("Projeto atualizado com sucesso!");
+        this.fetchGetProjects(); // Atualiza a lista de projetos
+      } catch (error) {
+        console.error("Erro ao atualizar projeto:", error);
+        alert("Erro ao atualizar projeto!");
       }
-    );
-    const index = this.items.findIndex(
-      (item) => item.id === this.editedItem.id
-    );
-    if (index !== -1) {
-      this.items.splice(index, 1, response.data);
     }
-    this.dialog = false;
-    alert("Projeto atualizado com sucesso!");
-  } catch (error) {
-    console.error("Erro ao atualizar projeto:", error);
-    alert("Erro ao atualizar projeto!");
-  }
-}
   },
 };
 </script>

@@ -1,11 +1,11 @@
 <template>
   <v-container>
-      <v-toolbar flat>
-        <h1>{{ project.name }}</h1>
-        <v-spacer></v-spacer>
-        <button @click="openDialog" class="v-btn-create">Criar Atividade</button>    
-        <ComponentPostActivity v-model="showDialog" :projectId="project.id" />
-      </v-toolbar>
+    <v-toolbar flat>
+      <h1>{{ project.name }}</h1>
+      <v-spacer></v-spacer>
+      <button @click="openDialog" class="v-btn-create">Criar Atividade</button>
+      <ComponentPostActivity v-model="showDialog" :projectId="project.id" />
+    </v-toolbar>
     <v-row>
       <v-col v-for="status in statuses" :key="status" cols="4">
         <h2>{{ status }}</h2>
@@ -15,9 +15,11 @@
           class="mb-3"
           draggable="true"
           @dragstart="onDragStart(activity)"
+          @dblclick="openUpdateDialog(activity)"
         >
-          <v-card-title>{{ activity.name }}</v-card-title>
-          <v-card-subtitle>{{ activity.description_activity }}</v-card-subtitle>
+          <v-card-title>Titulo: {{ activity.name }}</v-card-title>
+          <v-card-subtitle>Descrição: {{ activity.description_activity }}</v-card-subtitle>
+          <v-icon icon @click.stop="openDeleteDialog(activity)" class="red--text">mdi-delete</v-icon>
         </v-card>
         <!-- Drop Area -->
         <div
@@ -30,13 +32,23 @@
         </div>
       </v-col>
     </v-row>
+    <ComponentUpdateActivity v-model="showUpdateDialog" :activity="selectedActivity" />
+    <ComponentDeleteActivity v-model="showDeleteDialog" :activity="selectedActivity" />
   </v-container>
 </template>
 
 <script>
 import axios from "axios";
+import ComponentPostActivity from "./ComponentPostActivity.vue";
+import ComponentUpdateActivity from "./ComponentUpdateActivity.vue";
+import ComponentDeleteActivity from "./ComponentDeleteActivity.vue";
 
 export default {
+  components: {
+    ComponentPostActivity,
+    ComponentUpdateActivity,
+    ComponentDeleteActivity,
+  },
   data() {
     return {
       project: {},
@@ -49,44 +61,53 @@ export default {
         DONE: [],
       },
       showDialog: false,
-      draggedActivity: null, // Atividade sendo arrastada
+      showUpdateDialog: false,
+      showDeleteDialog: false,
+      draggedActivity: null,
+      selectedActivity: null,
     };
   },
   methods: {
     onDragStart(activity) {
-      // Armazena a atividade sendo arrastada
       this.draggedActivity = activity;
     },
-     openDialog() {
+    openDialog() {
       this.showDialog = true;
     },
-async onDrop(newStatus) {
-  if (!this.draggedActivity || !this.statuses.includes(newStatus)) {
-    console.error("Status inválido ou nenhuma atividade arrastada");
-    return;
-  }
+    openUpdateDialog(activity) {
+      this.selectedActivity = activity;
+      this.showUpdateDialog = true;
+    },
+    openDeleteDialog(activity) {
+      this.selectedActivity = activity;
+      this.showDeleteDialog = true;
+    },
+    async onDrop(newStatus) {
+      if (!this.draggedActivity || !this.statuses.includes(newStatus)) {
+        console.error("Status inválido ou nenhuma atividade arrastada");
+        return;
+      }
 
-  try {
-    await axios.patch(`http://localhost:8000/activitys/${this.draggedActivity.id}/status/`, {
-      status: newStatus, // Envia o status correto
-    });
+      try {
+        await axios.patch(`http://localhost:8000/activitys/${this.draggedActivity.id}/status/`, {
+          status: newStatus,
+        });
 
-    const currentStatus = this.draggedActivity.status;
+        const currentStatus = this.draggedActivity.status;
 
-    // Atualiza localmente
-    this.activities[currentStatus] = this.activities[currentStatus].filter(
-      (activity) => activity.id !== this.draggedActivity.id
-    );
+        this.activities[currentStatus] = this.activities[currentStatus].filter(
+          (activity) => activity.id !== this.draggedActivity.id
+        );
 
-    this.draggedActivity.status = newStatus;
-    this.activities[newStatus].push(this.draggedActivity);
+        this.draggedActivity.status = newStatus;
+        this.activities[newStatus].push(this.draggedActivity);
 
-    this.draggedActivity = null; // Reseta após mover
-  } catch (error) {
-    console.error("Erro ao mover atividade:", error.response?.data || error.message);
-    alert("Não foi possível mover a atividade. Tente novamente.");
-  }
-}
+        this.draggedActivity = null;
+      } catch (error) {
+        console.error("Erro ao mover atividade:", error.response?.data || error.message);
+        alert("Não foi possível mover a atividade. Tente novamente.");
+      }
+    },
   },
   async created() {
     const projectId = parseInt(this.$route.params.id, 10);
@@ -107,14 +128,12 @@ async onDrop(newStatus) {
 };
 </script>
 
+
 <style>
-.v-btn-create {
-  margin: 20px;
-  border: 1px solid #3f51b5;
-  background-color: #3f51b5;
-  color: white;
-  border-radius: 4px;
-  width: 120px;
-  height: 40px;
+h1{
+  margin: 15px;
+}
+.v-icon.red--text {
+  color: red;
 }
 </style>
