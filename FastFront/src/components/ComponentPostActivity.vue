@@ -49,6 +49,7 @@
 
 <script>
 import axios from "axios";
+import { toast } from 'vue3-toastify';
 
 export default {
   props: {
@@ -60,11 +61,6 @@ export default {
       type: Number,
       required: true,
     },
-  },
-  setup(){
-    const notify = () => {
-      toast.info('Atividade criada com sucesso!')
-    }
   },
   data() {
     return {
@@ -95,11 +91,11 @@ export default {
         };
 
         await axios.post(`http://127.0.0.1:8000/activitys/`, dataToSend);
-        alert("Atividade criada com sucesso!");
+        toast.success("Atividade criada com sucesso!"); // Exibe o toast de sucesso
         this.$emit("activity-created"); // Emite o evento quando a atividade é criada
-        this.closeDialog();
       } catch (error) {
         console.error("Erro ao criar atividade:", error.response?.data || error.message);
+        toast.error("Erro ao criar atividade!"); // Exibe o toast de erro
       }
     },
     updateDialog(value) {

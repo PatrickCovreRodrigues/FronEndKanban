@@ -54,6 +54,7 @@
     <ComponentUpdateActivity
       v-model="showUpdateDialog"
       :activity="selectedActivity"
+      @activity-updated="fetchActivities"
     />
     <ComponentDeleteActivity
       v-model="showDeleteDialog"
@@ -68,6 +69,7 @@ import axios from "axios";
 import ComponentPostActivity from "./ComponentPostActivity.vue";
 import ComponentUpdateActivity from "./ComponentUpdateActivity.vue";
 import ComponentDeleteActivity from "./ComponentDeleteActivity.vue";
+import { toast } from 'vue3-toastify';
 
 export default {
   components: {
@@ -140,9 +142,10 @@ export default {
         this.activities[newStatus].push(this.draggedActivity);
 
         this.draggedActivity = null;
+        toast.success("Atividade movida com sucesso!"); // Exibe o toast de sucesso
       } catch (error) {
         console.error("Erro ao mover atividade:", error.response?.data || error.message);
-        alert("Não foi possível mover a atividade. Tente novamente.");
+        toast.error("Erro ao mover atividade!"); // Exibe o toast de erro
       }
     },
     async fetchActivities() {

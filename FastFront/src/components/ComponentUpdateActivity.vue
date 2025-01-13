@@ -90,7 +90,8 @@ export default {
     },
     async submit() {
       if (!this.formData.name || !this.formData.description_activity) {
-        alert("Por favor, preencha todos os campos obrigatórios.");
+        this.$emit('activity-updated'); 
+        this.closeDialog
         return;
       }
 
